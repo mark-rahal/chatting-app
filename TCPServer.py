@@ -7,34 +7,41 @@ userToSocket = {}
 numUsers = 0
 
 
+def send(socket, obj):
+    socket.send((json.dumps(obj) + '\n').encode())
+
+
 def syncUsers():
+    global users
     global userToSocket
+    global numUsers
 
     for sock in userToSocket.values():
-        sock.send(json.dumps({'msgType': 1, 'users': users}).encode())
+        send(sock, {'msgType': 1, 'users': users})
 
 
 def handleConnection(socket):
-    global numUsers
     global users
     global userToSocket
+    global numUsers
 
     userId = str(numUsers)
     userToSocket[userId] = socket
     while 1:
         msg = socket.recv(1024)
+        if (len(msg) == 0):
+            break
+
         msg = json.loads(msg.decode())
-        print(msg)
 
         msgType = msg['msgType']
         if (msgType == 0):
             # msg type 0 = register user
-            welcomeMsg = json.dumps(
-                {'id': userId, 'msg': 'Welcome, ' + msg['username']})
-            users[userId] = {"username": msg['username'],  "chatWith": None}
+            users[userId] = {"username": msg['username'], "chatWith": None}
             numUsers += 1
             print(users)
-            socket.send(welcomeMsg.encode())
+            send(socket, {'msgType': 0, 'id': userId,
+                          'msg': 'Welcome, ' + msg['username']})
             syncUsers()
         elif (msgType == 2):
             # msg type 2 = chat request
@@ -42,8 +49,7 @@ def handleConnection(socket):
             otherUserId = msg['chatWith']
             users[userId]['chatWith'] = otherUserId
             syncUsers()
-            userToSocket[otherUserId].send(json.dumps(
-                {'msgType': 2, 'id': userId}).encode())
+            send(userToSocket[otherUserId], {'msgType': 2, 'id': userId})
         elif(msgType == 3):
             # msg type 3 = close connection
             break
@@ -52,14 +58,13 @@ def handleConnection(socket):
             print(userToSocket)
             text = msg['msg']
             otherUserId = users[userId]['chatWith']
-            socket.send(
-                json.dumps({'msgType': 4, 'username': users[userId]['username'], 'msg': text}).encode())
-            userToSocket[otherUserId].send(
-                json.dumps({'msgType': 4, 'username': users[userId]['username'], 'msg': text}).encode())
+            send(userToSocket[otherUserId], {
+                 'msgType': 4, 'username': users[userId]['username'], 'msg': text})
             if (text == 'exit'):
                 # set chatwith to None for both users
                 print("blah")
     users.pop(userId)
+    del userToSocket[userId]
     syncUsers()
     socket.close()
 
