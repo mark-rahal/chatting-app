@@ -125,8 +125,17 @@ def run():
                 break
             else:
                 for tempId, user in users.items():
-                    #if (user != userId):
+                    #user['username'] = chatWith
                     send({'msgType': 2, 'chatWith': tempId})
+                    break
+
+                while 1:
+                    # asdf = True
+                    chatMsg = input('chat (type exit to exit): ')
+                    if (chatMsg == "exit"):
+                        break
+
+                    send({'msgType': 4, 'msg': chatMsg})
             #break
         else:
             print('Please enter a valid option.')

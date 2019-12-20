@@ -63,6 +63,16 @@ def handleConnection(socket):
             if (text == 'exit'):
                 # set chatwith to None for both users
                 print("blah")
+        elif(msgType == 6):
+            # msg type 6 = push msg to all clients
+            print(userToSocket)
+            text = msg['msg']
+            for socket in userToSocket:
+                send(socket[otherUserId], {'msgType': 4, 'username': users[userId]['username'], 'msg': text})
+            if (text == 'exit'):
+                # set chatwith to None for both users
+                print("blah")
+
     users.pop(userId)
     del userToSocket[userId]
     syncUsers()
