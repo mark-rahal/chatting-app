@@ -119,6 +119,15 @@ def run():
             print('Goodbye.')
             send({'msgType': 3})
             break
+        elif (selectedAction == 5):
+            if (len(users) == 1):
+                print('Not enough users to form a group chat')
+                break
+            else:
+                for tempId, user in users.items():
+                    #if (user != userId):
+                    send({'msgType': 2, 'chatWith': tempId})
+            #break
         else:
             print('Please enter a valid option.')
     clientSocket.close()
@@ -128,6 +137,7 @@ def promptAction():
     print('1. List Users')
     print('2. Chat')
     print('3. Exit')
+    print('5. Group Chat')
     return input('Enter choice: ')
 
 
