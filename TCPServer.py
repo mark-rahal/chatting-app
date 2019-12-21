@@ -57,8 +57,9 @@ def handleConnection(socket):
             # msg type 4 = receive chat msg
             print(userToSocket)
             text = msg['msg']
-            otherUserId = users[userId]['chatWith']
-            send(userToSocket[otherUserId], {
+            otherUserIds = users[userId]['chatWith']
+            for other in otherUserIds:
+              send(userToSocket[other], {
                  'msgType': 4, 'username': users[userId]['username'], 'msg': text})
             if (text == 'exit'):
                 # set chatwith to None for both users
